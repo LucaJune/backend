@@ -8,9 +8,9 @@ const schema = {
   properties: {
     id: { type: "string", minLength: 32, maxLength: 32 },
     name: { type: "string", maxLength: 50 },
-    itemIdList: { type: "string" },
+    itemIdList: { type: "array" },
   },
-  required: ["name", "itemIdList", "id"],
+  required: ["name", "id"],
   additionalProperties: false,
 };
 
@@ -32,7 +32,7 @@ async function UpdateAbl(req, res) {
     // update list in persistent storage
     let updatedList;
     try {
-      updatedLIst = listDao.update(list);
+      updatedList = listDao.update(list);
     } catch (e) {
       res.status(400).json({
         ...e,

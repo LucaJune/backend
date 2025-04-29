@@ -7,11 +7,12 @@ const schema = {
   type: "object",
   properties: {
     name: { type: "string", maxLength: 50 },
-    itemIdList: { type: "string" },
+    itemIdList: { type: "array"}
   },
-  required: ["name", "itemIdList"],
+  required: ["name"],
   additionalProperties: false,
 };
+
 
 async function CreateAbl(req, res) {
   try {

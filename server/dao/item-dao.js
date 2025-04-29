@@ -2,7 +2,11 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
-const itemFolderPath = path.join(__dirname, "storage", "itemList");
+const itemFolderPath = path.join(
+  __dirname, 
+  "storage", 
+  "itemList"
+);
 
 // Method to read an item from a file
 function get(itemId) {
@@ -12,11 +16,11 @@ function get(itemId) {
     return JSON.parse(fileData);
   } catch (error) {
     if (error.code === "ENOENT") return null;
-    throw { code: "failedToReadItem", item: error.item };
+    throw { code: "failedToReadItem", message: error.item };
   }
 }
 
-// Method to write an item to a file
+// Method to create an item to a file
 function create(item) {
   try {
     item.id = crypto.randomBytes(16).toString("hex");
@@ -25,7 +29,7 @@ function create(item) {
     fs.writeFileSync(filePath, fileData, "utf8");
     return item;
   } catch (error) {
-    throw { code: "failedToCreateItem", item: error.item };
+    throw { code: "failedToCreateItem", message: error.message };
   }
 }
 
@@ -35,23 +39,13 @@ function update(item) {
     const currentItem = get(item.id);
     if (!currentItem) return null;
 
-    if (item.name && item.name !== currentItem.name) {
-      const itemList = list();
-      if (itemList.some((item) => item.name === item.name)) {
-        throw {
-          code: "uniqueNameAlreadyExists",
-          message: "exists item with given name",
-        };
-      }
-    }
-
     const newItem = { ...currentItem, ...item };
     const filePath = path.join(itemFolderPath, `${item.id}.json`);
     const fileData = JSON.stringify(newItem);
     fs.writeFileSync(filePath, fileData, "utf8");
     return newItem;
   } catch (error) {
-    throw { code: "failedToUpdateItem", item: error.item };
+    throw { code: "failedToUpdateItem", message: error.item };
   }
 }
 
@@ -65,7 +59,7 @@ function remove(itemId) {
     if (error.code === "ENOENT") {
       return {};
     }
-    throw { code: "failedToRemoveItem", item: error.item };
+    throw { code: "failedToRemoveItem", message: error.item };
   }
 }
 
@@ -82,7 +76,7 @@ function list() {
     });
     return itemList;
   } catch (error) {
-    throw { code: "failedToListItems", item: error.item };
+    throw { code: "failedToListItems", message: error.item };
   }
 }
 

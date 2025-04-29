@@ -1,12 +1,14 @@
 const Ajv = require("ajv");
+const addFormats = require("ajv-formats").default;
 const ajv = new Ajv();
+addFormats(ajv);
 
 const itemDao = require("../../dao/item-dao.js");
 
 const schema = {
   type: "object",
   properties: {
-    name: { type: "string" },
+    name: { type: "string"}
   },
   required: ["name"],
   additionalProperties: false,
@@ -21,26 +23,21 @@ async function CreateAbl(req, res) {
     if (!valid) {
       res.status(400).json({
         code: "dtoInIsNotValid",
-        item: "dtoIn is not valid",
+        message: "dtoIn is not valid",
         validationError: ajv.errors,
       });
       return;
     }
 
-    // store item to a persistant storage
-    try {
-      item = itemDao.create(item);
-    } catch (e) {
-      res.status(400).json({
-        ...e,
-      });
-      return;
-    }
+
+    // store item to persistent storage
+    item = itemDao.create(item);
 
     // return properly filled dtoOut
     res.json(item);
   } catch (e) {
-    res.status(500).json({ item: e.item });
+    console.error(e);
+    res.status(500).json({ message: e.message });
   }
 }
 
