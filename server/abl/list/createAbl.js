@@ -7,12 +7,12 @@ const schema = {
   type: "object",
   properties: {
     name: { type: "string", maxLength: 50 },
-    itemIdList: { type: "array"}
+    itemIdList: { type: "array" },
+    memberIdList: { type: "array"}
   },
   required: ["name"],
   additionalProperties: false,
 };
-
 
 async function CreateAbl(req, res) {
   try {
@@ -23,13 +23,17 @@ async function CreateAbl(req, res) {
     if (!valid) {
       res.status(400).json({
         code: "dtoInIsNotValid",
-        list: "dtoIn is not valid",
+        message: "dtoIn is not valid",
         validationError: ajv.errors,
       });
       return;
     }
 
-    // store list to a persistant storage
+    // Add owner information
+    list.ownerID = req.user.id; // Předpokládá, že ID uživatele je v req.user.id
+    list.ownerName = req.user.name; // Předpokládá, že jméno uživatele je v req.user.name
+
+    // store list to a persistent storage
     try {
       list = listDao.create(list);
     } catch (e) {
@@ -42,7 +46,7 @@ async function CreateAbl(req, res) {
     // return properly filled dtoOut
     res.json(list);
   } catch (e) {
-    res.status(500).json({ list: e.list });
+    res.status(500).json({ message: e.message });
   }
 }
 

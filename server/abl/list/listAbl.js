@@ -29,10 +29,16 @@ async function ListAbl(req, res) {
       return;
     }
 
-    const listList = listDao.list(filter);
+    // get all lists
+    const allLists = listDao.list(filter);
+
+    // filter lists by ownership or membership
+    const userLists = allLists.filter(list => 
+      list.ownerID === req.user.id || list.memberIdList.includes(req.user.id)
+    );
 
     // return properly filled dtoOut
-    res.json({listList});
+    res.json({ listList: userLists });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }

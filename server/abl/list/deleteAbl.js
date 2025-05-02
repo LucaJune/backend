@@ -20,19 +20,38 @@ async function DeleteAbl(req, res) {
     if (!valid) {
       res.status(400).json({
         code: "dtoInIsNotValid",
-        list: "dtoIn is not valid",
+        message: "dtoIn is not valid",
         validationError: ajv.errors,
       });
       return;
     }
 
-    // remove list from persistant storage
+    // get the list to check ownership
+    const list = listDao.get(reqParams.id);
+    if (!list) {
+      res.status(404).json({
+        code: "listNotFound",
+        message: "List not found",
+      });
+      return;
+    }
+
+    // check if the user is the owner of the list
+    if (list.ownerID !== req.user.id) {
+      res.status(403).json({
+        code: "notAuthorized",
+        message: "User is not authorized to delete this list",
+      });
+      return;
+    }
+
+    // remove list from persistent storage
     listDao.remove(reqParams.id);
 
     // return properly filled dtoOut
     res.json({});
   } catch (e) {
-    res.status(500).json({ list: e.list });
+    res.status(500).json({ message: e.message });
   }
 }
 

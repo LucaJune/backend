@@ -21,7 +21,7 @@ async function GetAbl(req, res) {
     if (!valid) {
       res.status(400).json({
         code: "dtoInIsNotValid",
-        list: "dtoIn is not valid",
+        message: "dtoIn is not valid",
         validationError: ajv.errors,
       });
       return;
@@ -32,7 +32,19 @@ async function GetAbl(req, res) {
     if (!list) {
       res.status(404).json({
         code: "listNotFound",
-        list: `list with id ${reqParams.id} not found`,
+        message: `list with id ${reqParams.id} not found`,
+      });
+      return;
+    }
+
+    // check if the user is the owner or a member of the list
+    const isOwner = list.ownerID === req.user.id;
+    const isMember = list.memberIdList.includes(req.user.id);
+
+    if (!isOwner && !isMember) {
+      res.status(403).json({
+        code: "notAuthorized",
+        message: "User is not authorized to view this list",
       });
       return;
     }
@@ -40,7 +52,7 @@ async function GetAbl(req, res) {
     // return properly filled dtoOut
     res.json(list);
   } catch (e) {
-    res.status(500).json({ list: e.list });
+    res.status(500).json({ message: e.message });
   }
 }
 
